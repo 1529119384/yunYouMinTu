@@ -633,6 +633,11 @@ async function initViewer() {
     })
 
     floors.value.forEach(f => renderFloor(f))
+
+    // 调试：用 Leaflet 默认蓝色标记验证标点可见性
+    L.marker([8192, 8192]).addTo(map)
+    L.circleMarker([8192, 8192], { color: 'red', radius: 20, fillOpacity: 0.5 }).addTo(map)
+    console.log('Debug markers added at [8192, 8192]')
   } catch (err) {
     error.value = err instanceof Error ? err.message : '加载失败'
     console.error(err)

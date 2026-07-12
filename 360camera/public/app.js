@@ -63,6 +63,16 @@ function initViewer(config) {
     viewer.on('load', hideLoading);
     setTimeout(hideLoading, loadTimeout);
 
+    // URL 参数指定场景时强制切换（兜底方案）
+    if (config.firstScene && config.firstScene !== sceneOrder[0]) {
+        setTimeout(function() {
+            try { viewer.loadScene(config.firstScene); } catch(e) {}
+            document.querySelectorAll('.scene-btn').forEach(function(btn) {
+                btn.classList.toggle('active', btn.dataset.scene === config.firstScene);
+            });
+        }, 500);
+    }
+
     // 导航按钮
     document.querySelectorAll('.scene-btn').forEach(btn => {
         btn.addEventListener('click', () => switchScene(btn.dataset.scene));
