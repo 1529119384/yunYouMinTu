@@ -1,0 +1,10 @@
+{
+  "name": "360camera",
+  "version": "1.0.0",
+  "description": "360° 全景导览",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  }
+}

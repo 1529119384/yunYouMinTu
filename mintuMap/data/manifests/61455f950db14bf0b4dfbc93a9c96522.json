@@ -1,0 +1,45 @@
+{
+  "id": "61455f950db14bf0b4dfbc93a9c96522",
+  "title": "3三楼.png",
+  "width": 16384,
+  "height": 16384,
+  "minZoom": 0,
+  "maxZoom": 5,
+  "tileSize": 512,
+  "extent": [
+    0.0,
+    -16384.0,
+    16384.0,
+    0.0
+  ],
+  "origin": [
+    0.0,
+    0.0
+  ],
+  "resolutions": [
+    32.0,
+    16.0,
+    8.0,
+    4.0,
+    2.0,
+    1.0
+  ],
+  "center": [
+    8192.0,
+    -8192.0
+  ],
+  "initialResolution": 32.0,
+  "urlTemplate": "http://0.0.0.0:25855/api/tiles/61455f950db14bf0b4dfbc93a9c96522/{z}/{x}/{y}.png",
+  "manifestUrl": "http://0.0.0.0:25855/api/tiles/61455f950db14bf0b4dfbc93a9c96522/manifest",
+  "tileFormat": "png",
+  "scheme": "xyz",
+  "projection": "pixel",
+  "bounds": [
+    0.0,
+    0.0,
+    16384.0,
+    16384.0
+  ],
+  "generatedBy": "gdal2tiles",
+  "note": null
+}

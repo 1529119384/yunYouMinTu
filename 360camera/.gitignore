@@ -1,0 +1,18 @@
+# Generated tiles (regenerate with: python generate_tiles.py)
+public/tiles/
+
+# Raw camera files
+*.dng
+
+# Large source panoramas (processed copies live in public/images/)
+images/
+
+# Preview screenshots
+preview*.jpg
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Node
+node_modules/

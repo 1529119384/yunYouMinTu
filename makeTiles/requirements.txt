@@ -1,0 +1,7 @@
+# NOTE: GDAL is also required but must be installed separately for your platform.
+# Ensure `python -m osgeo_utils.gdal2tiles` works before running the service.
+
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+pillow==11.3.0
+python-multipart==0.0.20

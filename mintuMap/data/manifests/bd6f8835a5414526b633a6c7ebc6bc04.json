@@ -1,0 +1,45 @@
+{
+  "id": "bd6f8835a5414526b633a6c7ebc6bc04",
+  "title": "5五楼.png",
+  "width": 16384,
+  "height": 16384,
+  "minZoom": 0,
+  "maxZoom": 5,
+  "tileSize": 512,
+  "extent": [
+    0.0,
+    -16384.0,
+    16384.0,
+    0.0
+  ],
+  "origin": [
+    0.0,
+    0.0
+  ],
+  "resolutions": [
+    32.0,
+    16.0,
+    8.0,
+    4.0,
+    2.0,
+    1.0
+  ],
+  "center": [
+    8192.0,
+    -8192.0
+  ],
+  "initialResolution": 32.0,
+  "urlTemplate": "http://0.0.0.0:8000/api/tiles/bd6f8835a5414526b633a6c7ebc6bc04/{z}/{x}/{y}.png",
+  "manifestUrl": "http://0.0.0.0:8000/api/tiles/bd6f8835a5414526b633a6c7ebc6bc04/manifest",
+  "tileFormat": "png",
+  "scheme": "xyz",
+  "projection": "pixel",
+  "bounds": [
+    0.0,
+    0.0,
+    16384.0,
+    16384.0
+  ],
+  "generatedBy": "gdal2tiles",
+  "note": null
+}

@@ -1,0 +1,45 @@
+{
+  "id": "floor-1-reading",
+  "title": "1一楼阅览室-自习室.png",
+  "width": 16384,
+  "height": 16384,
+  "minZoom": 0,
+  "maxZoom": 5,
+  "tileSize": 512,
+  "extent": [
+    0.0,
+    -16384.0,
+    16384.0,
+    0.0
+  ],
+  "origin": [
+    0.0,
+    0.0
+  ],
+  "resolutions": [
+    32.0,
+    16.0,
+    8.0,
+    4.0,
+    2.0,
+    1.0
+  ],
+  "center": [
+    8192.0,
+    -8192.0
+  ],
+  "initialResolution": 32.0,
+  "urlTemplate": "/tiles/floor-1-reading/{z}/{x}/{y}.png",
+  "manifestUrl": "/tiles/floor-1-reading/manifest",
+  "tileFormat": "png",
+  "scheme": "xyz",
+  "projection": "pixel",
+  "bounds": [
+    0.0,
+    0.0,
+    16384.0,
+    16384.0
+  ],
+  "generatedBy": "gdal2tiles",
+  "note": null
+}

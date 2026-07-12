@@ -1,0 +1,5 @@
+/.idea/
+*.iml
+app/data/
+__pycache__/
+*.pyc

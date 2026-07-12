@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>360° 全景 - 简单模式</title>
+    <link rel="stylesheet" href="vendor/pannellum.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="panorama"></div>
+
+<div class="badge">简单模式 (无切片)</div>
+
+<div class="scene-nav">
+    <button class="scene-btn active" data-scene="scene1">场景 1</button>
+    <button class="scene-btn" data-scene="scene2">场景 2</button>
+    <button class="scene-btn" data-scene="scene3">场景 3</button>
+</div>
+
+<div class="hint" id="hint">拖拽旋转 · 滚轮缩放 · 点击热点切换场景</div>
+
+<button class="auto-rotate-btn" id="autoRotateBtn" title="自动旋转">↻</button>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">全景加载中... (图片较大，请耐心等待)</div>
+</div>
+
+<script src="vendor/pannellum.js"></script>
+<script src="app.js"></script>
+<script>
+initViewer({
+    loadTimeout: 10000,
+    sceneOrder: ['scene1', 'scene2', 'scene3'],
+    scenes: {
+        scene1: {
+            type: 'equirectangular',
+            panorama: 'images/scene1.jpg',
+            hfov: 110,
+            autoRotate: -2,
+        },
+        scene2: {
+            type: 'equirectangular',
+            panorama: 'images/scene2.jpg',
+            hfov: 110,
+        },
+        scene3: {
+            type: 'equirectangular',
+            panorama: 'images/scene3.jpg',
+            hfov: 110,
+        }
+    }
+});
+</script>
+</body>
+</html>

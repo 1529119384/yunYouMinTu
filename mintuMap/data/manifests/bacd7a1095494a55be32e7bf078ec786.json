@@ -1,0 +1,45 @@
+{
+  "id": "bacd7a1095494a55be32e7bf078ec786",
+  "title": "0整体.png",
+  "width": 9490,
+  "height": 4357,
+  "minZoom": 0,
+  "maxZoom": 5,
+  "tileSize": 512,
+  "extent": [
+    0.0,
+    -4357.0,
+    9490.0,
+    0.0
+  ],
+  "origin": [
+    0.0,
+    0.0
+  ],
+  "resolutions": [
+    32.0,
+    16.0,
+    8.0,
+    4.0,
+    2.0,
+    1.0
+  ],
+  "center": [
+    4745.0,
+    -2178.5
+  ],
+  "initialResolution": 32.0,
+  "urlTemplate": "http://0.0.0.0:8000/api/tiles/bacd7a1095494a55be32e7bf078ec786/{z}/{x}/{y}.png",
+  "manifestUrl": "http://0.0.0.0:8000/api/tiles/bacd7a1095494a55be32e7bf078ec786/manifest",
+  "tileFormat": "png",
+  "scheme": "xyz",
+  "projection": "pixel",
+  "bounds": [
+    0.0,
+    0.0,
+    9490.0,
+    4357.0
+  ],
+  "generatedBy": "gdal2tiles",
+  "note": null
+}

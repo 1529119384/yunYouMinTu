@@ -1,0 +1,45 @@
+{
+  "id": "fd69cb6edc73400d9400a9ec5ed4aede",
+  "title": "1一楼大厅.png",
+  "width": 10000,
+  "height": 10000,
+  "minZoom": 0,
+  "maxZoom": 5,
+  "tileSize": 512,
+  "extent": [
+    0.0,
+    -10000.0,
+    10000.0,
+    0.0
+  ],
+  "origin": [
+    0.0,
+    0.0
+  ],
+  "resolutions": [
+    32.0,
+    16.0,
+    8.0,
+    4.0,
+    2.0,
+    1.0
+  ],
+  "center": [
+    5000.0,
+    -5000.0
+  ],
+  "initialResolution": 32.0,
+  "urlTemplate": "http://0.0.0.0:8000/api/tiles/fd69cb6edc73400d9400a9ec5ed4aede/{z}/{x}/{y}.png",
+  "manifestUrl": "http://0.0.0.0:8000/api/tiles/fd69cb6edc73400d9400a9ec5ed4aede/manifest",
+  "tileFormat": "png",
+  "scheme": "xyz",
+  "projection": "pixel",
+  "bounds": [
+    0.0,
+    0.0,
+    10000.0,
+    10000.0
+  ],
+  "generatedBy": "gdal2tiles",
+  "note": null
+}
