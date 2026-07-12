@@ -52,7 +52,7 @@ function initViewer(config) {
             compass: false,
             pitch: 5,
         },
-        firstScene: sceneOrder[0],
+        firstScene: config.firstScene || sceneOrder[0],
         scenes
     });
 

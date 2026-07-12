@@ -29,9 +29,15 @@
 <script src="vendor/pannellum.js"></script>
 <script src="app.js"></script>
 <script>
+var params = new URLSearchParams(window.location.search);
+var sceneParam = params.get('scene');
+var sceneOrder = ['scene1', 'scene2', 'scene3'];
+var firstScene = sceneParam && sceneOrder.includes(sceneParam) ? sceneParam : sceneOrder[0];
+
 initViewer({
     loadTimeout: 3000,
-    sceneOrder: ['scene1', 'scene2', 'scene3'],
+    firstScene: firstScene,
+    sceneOrder: sceneOrder,
     scenes: {
         scene1: {
             type: 'multires',

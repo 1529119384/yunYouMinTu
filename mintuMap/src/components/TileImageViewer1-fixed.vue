@@ -458,6 +458,10 @@ function handleAnnotationClick(ann) {
 }
 
 function handleMarkerClick(markerData) {
+  if (markerData.sceneUrl) {
+    window.open(markerData.sceneUrl, '_blank')
+    return
+  }
   activeMarkerId.value = markerData.id
   activeAnnotationId.value = ''
 }
