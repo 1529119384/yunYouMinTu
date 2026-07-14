@@ -45,6 +45,11 @@ docs/
 *.zip
 *.msi
 
+# Source images (too large for GitHub)
+makeTiles/images/
+mintuMap/data/images/
+闵图每层轴测图新的/
+
 # Editor config
 .reasonix/
 
