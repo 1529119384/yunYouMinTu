@@ -3,3 +3,6 @@
 app/data/
 __pycache__/
 *.pyc
+
+# Demo files
+app/admin/demo-html.html

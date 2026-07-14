@@ -31,3 +31,6 @@ yarn-error.log*
 
 /* 其他 */
 public/
+
+# Editor config
+.reasonix/

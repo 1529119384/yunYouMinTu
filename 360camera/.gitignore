@@ -1,3 +1,26 @@
+# pannellum-2.5.7 non-essential (vendored library source)
+pannellum-2.5.7/examples/
+pannellum-2.5.7/tests/
+pannellum-2.5.7/paper/
+pannellum-2.5.7/doc/
+pannellum-2.5.7/.travis.yml
+pannellum-2.5.7/.github/
+pannellum-2.5.7/utils/build/
+pannellum-2.5.7/utils/doc/
+pannellum-2.5.7/changelog.md
+pannellum-2.5.7/COPYING
+pannellum-2.5.7/readme.md
+pannellum-2.5.7/VERSION
+pannellum-2.5.7/package.json
+pannellum-2.5.7/.gitignore
+pannellum-2.5.7/.npmignore
+
+# pannellum metadata (vendored lib)
+pannellum/changelog.md
+pannellum/COPYING
+pannellum/readme.md
+pannellum/VERSION
+
 # Generated tiles (regenerate with: python generate_tiles.py)
 public/tiles/
 

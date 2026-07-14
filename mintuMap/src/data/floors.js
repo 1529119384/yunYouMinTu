@@ -22,7 +22,7 @@ export const FLOOR_CONFIG = {
       viewMaxZoom: 5,
       markers: [{
         id: 'pano-overall',
-        position: [8192, 8192],
+        position: [-194, 171],
         title: '正门全景',
         color: 'red',
         label: ['360°全景'],
@@ -39,7 +39,7 @@ export const FLOOR_CONFIG = {
       viewMaxZoom: 5,
       markers: [{
         id: 'pano-lobby',
-        position: [8192, 8192],
+        position: [-194, 171],
         title: '大厅全景',
         color: 'red',
         label: ['360°全景'],
@@ -74,7 +74,7 @@ export const FLOOR_CONFIG = {
       viewMaxZoom: 5,
       markers: [{
         id: 'pano-floor3',
-        position: [8192, 8192],
+        position: [-194, 171],
         title: '三楼全景',
         color: 'red',
         label: ['360°全景'],
