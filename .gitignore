@@ -40,6 +40,7 @@ yarn-error.log*
 CLAUDE.md
 docs/
 .claude/
+.mcp.json
 
 # Archives
 *.zip
