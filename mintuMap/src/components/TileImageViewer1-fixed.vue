@@ -2,14 +2,12 @@
   <div class="multi-floor-viewer" :style="{ background: backgroundColor }">
     <div ref="mapRef" class="viewer-map"></div>
 
-    <!-- 调试面板 -->
-    <div class="debug-panel">
-      <div>zoom: {{ debugZoom }}</div>
-      <div>floor: {{ currentFloorId }}</div>
-      <div>transitioning: {{ isTransitioning }}</div>
-      <div>center: {{ debugCenter }}</div>
-      <div>bounds: {{ debugBounds }}</div>
-    </div>
+    <nav class="map-toolbar" aria-label="地图页面导航">
+      <RouterLink class="map-toolbar__link" :to="{ name: 'floor-guide' }">
+        ← 楼层总览
+      </RouterLink>
+      <span>{{ currentFloor?.name || '楼层地图' }}</span>
+    </nav>
 
     <!-- 右侧楼层切换器 -->
     <transition name="floor-panel-slide">
@@ -90,6 +88,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { FLOOR_CONFIG } from '@/data/floors'
+import { useRouter } from 'vue-router'
 
 // ── 常量 ──────────────────────────────────────────────
 
@@ -109,7 +108,11 @@ const EMPTY_TILE = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
 
 const props = defineProps({
   backgroundColor: { type: String, default: '#0f172a' },
+  initialFloorId: { type: String, default: 'overall' },
 })
+
+const emit = defineEmits(['floor-change'])
+const router = useRouter()
 
 // ── 状态 ──────────────────────────────────────────────
 
@@ -129,11 +132,6 @@ let tileLayers = {}
 let markerLayers = {}
 let annotationLayers = {}
 let mapMeta = null
-
-// 调试数据
-const debugZoom = ref(0)
-const debugCenter = ref('')
-const debugBounds = ref('')
 
 // ── 计算属性 ──────────────────────────────────────────
 
@@ -178,25 +176,29 @@ function getFloorName(floorId) {
   return floors.value.find(f => f.id === floorId)?.name || floorId || '未知楼层'
 }
 
-function deriveBaseUrl(urlTemplate) {
-  return urlTemplate.replace(/\/\{z\}\/\{x\}\/\{y\}\.\w+$/, '')
-}
-
 // ── Leaflet 图标 ──────────────────────────────────────
 
-function getIconUrl(color) {
-  const map = { blue: '/pin_blue.svg', blueDark: '/pin_blueDark.svg', gray: '/pin_gray.svg',
-    red: '/pin_red.svg', orange: '/pin_orange.svg', gate: '/pin_gate.svg', landmark: '/pin_landmark.svg' }
-  return map[color] || '/pin_blue.svg'
-}
-
 function createMarkerIcon(markerData, active = false) {
-  const iconUrl = getIconUrl(markerData.color)
-  const size = active ? [52, 72] : [36, 50]
-  return L.icon({
-    iconUrl, iconSize: size,
-    iconAnchor: [size[0] / 2, size[1]],
-    popupAnchor: [0, -size[1]],
+  const colors = {
+    blue: '#66cccc', blueDark: '#1f296a', gray: '#3b3b3b',
+    red: '#cc6666', orange: '#d36839', gate: '#1f296a', landmark: '#1f296a',
+  }
+  const color = colors[markerData.color] || colors.blue
+  const width = active ? 58 : 48
+  const height = active ? 70 : 58
+  const html = `
+    <div class="pano-map-marker ${active ? 'pano-map-marker--active' : ''}" style="--marker-color:${color}">
+      <svg viewBox="0 0 48 58" aria-hidden="true">
+        <path d="M24 1C11.3 1 1 11.3 1 24c0 17.2 23 33 23 33s23-15.8 23-33C47 11.3 36.7 1 24 1Z" fill="var(--marker-color)" stroke="white" stroke-width="2"/>
+        <circle cx="24" cy="23" r="12" fill="white" fill-opacity=".94"/>
+      </svg>
+      <span>360°</span>
+    </div>`
+  return L.divIcon({
+    html,
+    className: 'pano-marker-wrapper',
+    iconSize: [width, height],
+    iconAnchor: [width / 2, height],
   })
 }
 
@@ -458,12 +460,26 @@ function handleAnnotationClick(ann) {
 }
 
 function handleMarkerClick(markerData) {
-  if (markerData.sceneUrl) {
-    window.open(markerData.sceneUrl, '_blank')
+  const sceneId = markerData.sceneId || getSceneIdFromUrl(markerData.sceneUrl)
+  if (sceneId) {
+    router.push({
+      name: 'panorama',
+      params: { sceneId },
+      query: { floor: currentFloorId.value },
+    })
     return
   }
   activeMarkerId.value = markerData.id
   activeAnnotationId.value = ''
+}
+
+function getSceneIdFromUrl(sceneUrl) {
+  if (!sceneUrl) return ''
+  try {
+    return new URL(sceneUrl, window.location.origin).searchParams.get('scene') || ''
+  } catch {
+    return ''
+  }
 }
 
 function handleMapBlankClick() {
@@ -514,6 +530,9 @@ async function enterFloor(floorId) {
   if (floor.viewMinZoom != null) map.setMinZoom(floor.viewMinZoom)
   if (floor.viewMaxZoom != null) map.setMaxZoom(floor.viewMaxZoom)
 
+  const floorBounds = getFloorBounds(floor)
+  if (floorBounds) map.fitBounds(floorBounds, { animate: true, duration: 0.45 })
+
   // 显示新楼层 marker/annotation
   if (markerLayers[floorId]) markerLayers[floorId].addTo(map)
   if (annotationLayers[floorId]) annotationLayers[floorId].addTo(map)
@@ -521,9 +540,10 @@ async function enterFloor(floorId) {
   isTransitioning.value = false
 }
 
-function switchToFloor(floorId) {
+async function switchToFloor(floorId) {
   if (floorId === currentFloorId.value || isTransitioning.value) return
-  enterFloor(floorId)
+  await enterFloor(floorId)
+  emit('floor-change', floorId)
 }
 
 // ── 瓦片加载 ──────────────────────────────────────────
@@ -536,14 +556,17 @@ function loadFloorTiles(floor) {
 
   const maxZoom = Number(config.maxZoom ?? 0)
   const tileSize = Number(config.tileSize ?? 256)
-  const baseUrl = deriveBaseUrl(config.urlTemplate)
+  const baseUrl = floor.tileBaseUrl || `/tiles/${config.id}`
 
   const sw = map.unproject([0, config.height], maxZoom)
   const ne = map.unproject([config.width, 0], maxZoom)
   const bounds = L.latLngBounds(sw, ne)
 
   const tileLayer = new ExactTileLayer({
-    tileSize, minZoom: 0, maxZoom,
+    tileSize,
+    minZoom: 0,
+    maxZoom: floor.viewMaxZoom ?? maxZoom,
+    maxNativeZoom: maxZoom,
     noWrap: true, bounds,
     keepBuffer: 1, updateWhenIdle: true,
     meta: config, baseUrl,
@@ -565,7 +588,7 @@ async function initViewer() {
   error.value = ''
   destroyMap()
 
-  currentFloorId.value = 'overall'
+  currentFloorId.value = props.initialFloorId
   activeAnnotationId.value = ''
   activeMarkerId.value = ''
   isTransitioning.value = false
@@ -612,32 +635,22 @@ async function initViewer() {
       annotationLayers[floor.id] = L.layerGroup()
     }
 
-    // 初始显示整体
-    currentFloorId.value = overallFloorId.value
-    if (tileLayers[overallFloorId.value]) tileLayers[overallFloorId.value].addTo(map)
-    markerLayers[overallFloorId.value]?.addTo(map)
-    annotationLayers[overallFloorId.value]?.addTo(map)
+    // 从楼层导览进入时直接显示目标层；非法参数回退到整体外观。
+    const requestedFloor = floors.value.find(f => f.id === props.initialFloorId)
+    const initialFloor = requestedFloor || floors.value.find(f => f.id === overallFloorId.value)
+    currentFloorId.value = initialFloor?.id || overallFloorId.value
+    if (initialFloor?.viewMinZoom != null) map.setMinZoom(initialFloor.viewMinZoom)
+    if (initialFloor?.viewMaxZoom != null) map.setMaxZoom(initialFloor.viewMaxZoom)
+    tileLayers[currentFloorId.value]?.addTo(map)
+    markerLayers[currentFloorId.value]?.addTo(map)
+    annotationLayers[currentFloorId.value]?.addTo(map)
 
-    const overallBounds = getFloorBounds(floors.value.find(f => f.id === overallFloorId.value))
-    if (overallBounds) map.fitBounds(overallBounds, { animate: false })
+    const initialBounds = getFloorBounds(initialFloor)
+    if (initialBounds) map.fitBounds(initialBounds, { animate: false })
     map.invalidateSize(false)
     map.on('click', handleMapBlankClick)
 
-    // 调试
-    map.on('zoomend moveend', () => {
-      debugZoom.value = map.getZoom().toFixed(2)
-      const c = map.getCenter()
-      debugCenter.value = `${c.lat.toFixed(0)}, ${c.lng.toFixed(0)}`
-      const b = map.getBounds()
-      debugBounds.value = `${b.getSouth().toFixed(0)},${b.getWest().toFixed(0)} - ${b.getNorth().toFixed(0)},${b.getEast().toFixed(0)}`
-    })
-
     floors.value.forEach(f => renderFloor(f))
-
-    // 调试：用 Leaflet 默认蓝色标记验证标点可见性
-    L.marker([8192, 8192]).addTo(map)
-    L.circleMarker([8192, 8192], { color: 'red', radius: 20, fillOpacity: 0.5 }).addTo(map)
-    console.log('Debug markers added at [8192, 8192]')
   } catch (err) {
     error.value = err instanceof Error ? err.message : '加载失败'
     console.error(err)
@@ -660,20 +673,68 @@ onBeforeUnmount(destroyMap)
 
 .viewer-map { width: 100%; height: 100%; }
 
-.debug-panel {
+.map-toolbar {
   position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  background: rgba(0,0,0,0.8);
-  color: #0f0;
-  font-family: monospace;
+  top: 16px;
+  left: 16px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  color: rgb(255 255 255 / 62%);
+  background: rgb(15 23 42 / 82%);
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 5px;
   font-size: 12px;
-  padding: 8px 14px;
-  border-radius: 6px;
-  line-height: 1.6;
-  pointer-events: none;
+  backdrop-filter: blur(10px);
+}
+
+.map-toolbar__link {
+  color: white;
+  text-decoration: none;
+}
+
+.map-toolbar__link:hover,
+.map-toolbar__link:focus-visible {
+  color: #ef9a78;
+  outline: none;
+}
+
+:deep(.pano-marker-wrapper) {
+  background: transparent;
+  border: 0;
+}
+
+:deep(.pano-map-marker) {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  filter: drop-shadow(0 5px 6px rgb(0 0 0 / 35%));
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+:deep(.pano-map-marker:hover),
+:deep(.pano-map-marker--active) {
+  transform: translateY(-4px) scale(1.08);
+  filter: drop-shadow(0 8px 9px rgb(0 0 0 / 42%));
+}
+
+:deep(.pano-map-marker svg) {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+:deep(.pano-map-marker span) {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  color: #24312c;
+  font-size: 10px;
+  font-weight: 800;
+  transform: translate(-50%, -50%);
 }
 
 .floor-panel {
