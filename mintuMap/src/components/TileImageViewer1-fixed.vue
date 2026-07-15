@@ -12,73 +12,70 @@
     </div>
 
     <!-- 右侧楼层切换器 -->
-    <transition name="floor-panel-slide">
-      <div v-if="showFloorPanel" class="floor-panel">
-        <div v-for="floor in [...floors].reverse()" :key="floor.id"
-             class="floor-panel__item"
-             :class="{ 'floor-panel__item--active': currentFloorId === floor.id }"
-             @click="switchToFloor(floor.id)">
-          <span class="floor-panel__name">{{ floor.name || floor.id }}</span>
-        </div>
+    <!-- [动画注释] transition name="floor-panel-slide" -->
+    <div v-if="showFloorPanel" class="floor-panel">
+      <div v-for="floor in [...floors].reverse()" :key="floor.id"
+           class="floor-panel__item"
+           :class="{ 'floor-panel__item--active': currentFloorId === floor.id }"
+           @click="switchToFloor(floor.id)">
+        <span class="floor-panel__name">{{ floor.name || floor.id }}</span>
       </div>
-    </transition>
+    </div>
 
     <!-- 底部抽屉 -->
-    <transition name="bottom-drawer-panel" appear>
-      <div v-if="drawerVisible" class="bottom-drawer">
-        <transition name="bottom-drawer-switch" mode="out-in" appear>
-          <div :key="drawerKey" class="bottom-drawer__content">
-            <template v-if="drawerType === 'project'">
-              <div class="drawer-left">
-                <h1 class="drawer-title">{{ project.title || '《项目名称》' }}</h1>
-              </div>
-              <div class="drawer-right">
-                <p class="drawer-desc">{{ project.description }}</p>
-              </div>
-              <div class="drawer-hints">
-                <div class="drawer-hint">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2"/>
-                    <path d="M9 3v18M3 9h18"/>
-                  </svg>
-                  <span>按住拖动移动</span>
-                </div>
-                <div class="drawer-hint">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
-                    <circle cx="12" cy="12" r="9"/>
-                    <path d="M12 8v8M8 12h8"/>
-                  </svg>
-                  <span>滚轮缩放大小</span>
-                </div>
-              </div>
-            </template>
-            <template v-else-if="drawerType === 'annotation'">
-              <div class="drawer-left">
-                <h1 class="drawer-title">{{ activeAnnotation?.label || '标注' }}</h1>
-              </div>
-              <div class="drawer-right">
-                <p class="drawer-desc">点击进入 {{ getFloorName(activeAnnotation?.targetFloor) }}</p>
-              </div>
-            </template>
-            <template v-else-if="drawerType === 'marker'">
-              <div class="drawer-left">
-                <h1 class="drawer-title">{{ activeMarker?.title || '标点' }}</h1>
-                <div class="drawer-tags">
-                  <span v-for="tag in (activeMarker?.label || [])" :key="tag"
-                        class="drawer-tag"
-                        :style="{ backgroundColor: getTagColor(activeMarker?.color) }">
-                    {{ tag }}
-                  </span>
-                </div>
-              </div>
-              <div class="drawer-right">
-                <p class="drawer-desc">{{ activeMarker?.text }}</p>
-              </div>
-            </template>
+    <!-- [动画注释] transition name="bottom-drawer-panel" appear -->
+    <div v-if="drawerVisible" class="bottom-drawer">
+      <!-- [动画注释] transition name="bottom-drawer-switch" mode="out-in" appear -->
+      <div :key="drawerKey" class="bottom-drawer__content">
+        <template v-if="drawerType === 'project'">
+          <div class="drawer-left">
+            <h1 class="drawer-title">{{ project.title || '《项目名称》' }}</h1>
           </div>
-        </transition>
+          <div class="drawer-right">
+            <p class="drawer-desc">{{ project.description }}</p>
+          </div>
+          <div class="drawer-hints">
+            <div class="drawer-hint">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M9 3v18M3 9h18"/>
+              </svg>
+              <span>按住拖动移动</span>
+            </div>
+            <div class="drawer-hint">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M12 8v8M8 12h8"/>
+              </svg>
+              <span>滚轮缩放大小</span>
+            </div>
+          </div>
+        </template>
+        <template v-else-if="drawerType === 'annotation'">
+          <div class="drawer-left">
+            <h1 class="drawer-title">{{ activeAnnotation?.label || '标注' }}</h1>
+          </div>
+          <div class="drawer-right">
+            <p class="drawer-desc">点击进入 {{ getFloorName(activeAnnotation?.targetFloor) }}</p>
+          </div>
+        </template>
+        <template v-else-if="drawerType === 'marker'">
+          <div class="drawer-left">
+            <h1 class="drawer-title">{{ activeMarker?.title || '标点' }}</h1>
+            <div class="drawer-tags">
+              <span v-for="tag in (activeMarker?.label || [])" :key="tag"
+                    class="drawer-tag"
+                    :style="{ backgroundColor: getTagColor(activeMarker?.color) }">
+                {{ tag }}
+              </span>
+            </div>
+          </div>
+          <div class="drawer-right">
+            <p class="drawer-desc">{{ activeMarker?.text }}</p>
+          </div>
+        </template>
       </div>
-    </transition>
+    </div>
 
     <div v-if="loading" class="viewer-overlay">正在加载切片...</div>
     <div v-else-if="error" class="viewer-overlay viewer-overlay--error">{{ error }}</div>
@@ -122,7 +119,6 @@ const floors = ref([])
 const currentFloorId = ref('overall')
 const activeAnnotationId = ref('')
 const activeMarkerId = ref('')
-const isTransitioning = ref(false)
 
 let map = null
 let tileLayers = {}
@@ -233,23 +229,20 @@ const ExactTileLayer = L.GridLayer.extend({
   },
 })
 
-// ── 图层切换动画（PPT/Google 室内地图风格） ──────────
+// ── 图层切换（已移除动画，保留原始代码供参考） ──────────
 
+/*
+// 动画：等待瓦片加载完成
 function waitForLayerReady(layer, timeout = 8000) {
   return new Promise(resolve => {
     if (!layer) { resolve(null); return }
     const container = layer.getContainer()
     if (!container) { resolve(null); return }
-
-    // 主方案：监听 Leaflet GridLayer 的 load 事件
-    // 该事件在所有可视瓦片完成加载/解码后触发，比 DOM 检测更可靠
     const onLoad = () => {
       layer.off('load', onLoad)
       resolve(container)
     }
     layer.once('load', onLoad)
-
-    // 辅助检查：如果瓦片已存在且有实际解码内容，直接 resolve
     function checkLoaded() {
       const imgs = container.querySelectorAll('img.leaflet-tile')
       if (imgs.length === 0) return false
@@ -262,16 +255,11 @@ function waitForLayerReady(layer, timeout = 8000) {
       }
       return false
     }
-
     if (checkLoaded()) return
-
-    // 备份：MutationObserver 监测新瓦片加入 DOM
     const observer = new MutationObserver(() => {
       if (checkLoaded()) observer.disconnect()
     })
     observer.observe(container, { childList: true, subtree: true })
-
-    // 超时兜底
     setTimeout(() => {
       observer.disconnect()
       layer.off('load', onLoad)
@@ -280,128 +268,59 @@ function waitForLayerReady(layer, timeout = 8000) {
   })
 }
 
+// 动画：滑动过渡
 function slideTransition(oldLayer, newLayer, direction = 'up', duration = 600) {
   return new Promise(resolve => {
     if (!map) { resolve(); return }
-
-    // 旧图层未在地图上，直接淡入新图层
     if (!oldLayer || !map.hasLayer(oldLayer)) {
-      if (newLayer) {
-        newLayer.setOpacity(0)
-        if (map.hasLayer(newLayer)) map.removeLayer(newLayer)
-        newLayer.addTo(map)
-        fadeInLayer(newLayer, duration).then(resolve)
-      } else { resolve() }
+      if (newLayer) { newLayer.setOpacity(0); if (map.hasLayer(newLayer)) map.removeLayer(newLayer); newLayer.addTo(map); fadeInLayer(newLayer, duration).then(resolve) }
+      else { resolve() }
       return
     }
-
-    const mapEl = mapRef.value
-    const isUp = direction === 'up'
-
-    // 1. 克隆旧图层快照（瓦片已加载，可立即克隆）
+    const mapEl = mapRef.value; const isUp = direction === 'up'
     const oldContainer = oldLayer.getContainer()
     const oldTiles = oldContainer?.querySelector('.leaflet-tile-container')
     if (!oldTiles) { map.removeLayer(oldLayer); resolve(); return }
-
     const oldOverlay = document.createElement('div')
-    oldOverlay.style.cssText = `position:absolute;inset:0;z-index:10001;overflow:hidden;pointer-events:none;background:transparent;`
-    const oldCloned = oldTiles.cloneNode(true)
-    oldCloned.style.position = 'absolute'
-    oldCloned.style.top = '0'
-    oldCloned.style.left = '0'
-    oldOverlay.appendChild(oldCloned)
-    mapEl.appendChild(oldOverlay)
-
-    // 2. 添加新图层（opacity 0），移除旧图层
-    if (newLayer) {
-      newLayer.setOpacity(0)
-      // 确保图层不在地图上，让 addTo 创建全新容器并重新请求瓦片
-      if (map.hasLayer(newLayer)) map.removeLayer(newLayer)
-      newLayer.addTo(map)
-    }
+    oldOverlay.style.cssText = 'position:absolute;inset:0;z-index:10001;overflow:hidden;pointer-events:none;background:transparent;'
+    const oldCloned = oldTiles.cloneNode(true); oldCloned.style.position = 'absolute'; oldCloned.style.top = '0'; oldCloned.style.left = '0'
+    oldOverlay.appendChild(oldCloned); mapEl.appendChild(oldOverlay)
+    if (newLayer) { newLayer.setOpacity(0); if (map.hasLayer(newLayer)) map.removeLayer(newLayer); newLayer.addTo(map) }
     map.removeLayer(oldLayer)
-
-    // 3. 等待新图层瓦片加载，然后克隆
     waitForLayerReady(newLayer).then(newContainer => {
       const newTiles = newContainer?.querySelector('.leaflet-tile-container')
-
-      // 创建新覆盖层
       let newOverlay = null
       if (newTiles) {
         newOverlay = document.createElement('div')
-        newOverlay.style.cssText = `position:absolute;inset:0;z-index:10000;overflow:hidden;pointer-events:none;background:transparent;`
-        const newCloned = newTiles.cloneNode(true)
-        newCloned.style.position = 'absolute'
-        newCloned.style.top = '0'
-        newCloned.style.left = '0'
-        newOverlay.appendChild(newCloned)
-        newOverlay.style.transform = isUp ? 'translateY(100%)' : 'translateY(-100%)'
-        newOverlay.style.opacity = '0'
+        newOverlay.style.cssText = 'position:absolute;inset:0;z-index:10000;overflow:hidden;pointer-events:none;background:transparent;'
+        const newCloned = newTiles.cloneNode(true); newCloned.style.position = 'absolute'; newCloned.style.top = '0'; newCloned.style.left = '0'
+        newOverlay.appendChild(newCloned); newOverlay.style.transform = isUp ? 'translateY(100%)' : 'translateY(-100%)'; newOverlay.style.opacity = '0'
         mapEl.appendChild(newOverlay)
       }
-
-      // 4. 预解码所有克隆图片
-      const allImages = [
-        ...oldCloned.querySelectorAll('img'),
-        ...(newOverlay ? newOverlay.querySelectorAll('img') : []),
-      ]
-      const decodePromises = allImages.map(img => {
-        if (img.decode) return img.decode().catch(() => {})
-        return new Promise(r => { img.complete ? r() : (img.onload = r, img.onerror = r) })
-      })
-
+      const allImages = [...oldCloned.querySelectorAll('img'), ...(newOverlay ? newOverlay.querySelectorAll('img') : [])]
+      const decodePromises = allImages.map(img => { if (img.decode) return img.decode().catch(() => {}); return new Promise(r => { img.complete ? r() : (img.onload = r, img.onerror = r) }) })
       Promise.all(decodePromises).then(() => {
-        // 5. 强制回流后启动动画
-        oldOverlay.offsetHeight
-        if (newOverlay) newOverlay.offsetHeight
-
-        const transition = `transform ${duration}ms cubic-bezier(0.22,1,0.36,1), opacity ${duration}ms ease-out`
-        oldOverlay.style.transition = transition
-        if (newOverlay) newOverlay.style.transition = transition
-
-        // 旧覆盖层：滑出 + 淡出
-        oldOverlay.style.transform = isUp ? 'translateY(-100%)' : 'translateY(100%)'
-        oldOverlay.style.opacity = '0'
-
-        // 新覆盖层：从屏幕外滑入 + 淡入
-        if (newOverlay) {
-          newOverlay.style.transform = 'translateY(0)'
-          newOverlay.style.opacity = '1'
-        }
-
-        // 6. 动画结束清理
-        setTimeout(() => {
-          oldOverlay.remove()
-          newOverlay?.remove()
-          if (newLayer) newLayer.setOpacity(1)
-          resolve()
-        }, duration)
+        oldOverlay.offsetHeight; if (newOverlay) newOverlay.offsetHeight
+        const transition = 'transform ${duration}ms cubic-bezier(0.22,1,0.36,1), opacity ${duration}ms ease-out'
+        oldOverlay.style.transition = transition; if (newOverlay) newOverlay.style.transition = transition
+        oldOverlay.style.transform = isUp ? 'translateY(-100%)' : 'translateY(100%)'; oldOverlay.style.opacity = '0'
+        if (newOverlay) { newOverlay.style.transform = 'translateY(0)'; newOverlay.style.opacity = '1' }
+        setTimeout(() => { oldOverlay.remove(); newOverlay?.remove(); if (newLayer) newLayer.setOpacity(1); resolve() }, duration)
       })
     })
   })
 }
 
+// 动画：淡入
 function fadeInLayer(layer, duration = 500) {
   if (!layer || !map) return Promise.resolve()
   return new Promise(resolve => {
-    if (!map.hasLayer(layer)) {
-      layer.setOpacity(0)
-      layer.addTo(map)
-    }
-    const steps = 10
-    const stepTime = duration / steps
-    let step = 0
-    const timer = setInterval(() => {
-      step++
-      layer.setOpacity(step / steps)
-      if (step >= steps) {
-        clearInterval(timer)
-        layer.setOpacity(1)
-        resolve()
-      }
-    }, stepTime)
+    if (!map.hasLayer(layer)) { layer.setOpacity(0); layer.addTo(map) }
+    const steps = 10; const stepTime = duration / steps; let step = 0
+    const timer = setInterval(() => { step++; layer.setOpacity(step / steps); if (step >= steps) { clearInterval(timer); layer.setOpacity(1); resolve() } }, stepTime)
   })
 }
+*/
 
 // ── 标记渲染 ──────────────────────────────────────────
 
@@ -449,7 +368,6 @@ function renderFloor(floor) {
 // ── 交互处理 ──────────────────────────────────────────
 
 function handleAnnotationClick(ann) {
-  if (isTransitioning.value) return
   activeAnnotationId.value = ann.id
   activeMarkerId.value = ''
   if (ann.targetFloor) {
@@ -481,48 +399,36 @@ function getFloorBounds(floor) {
   return L.latLngBounds(sw, ne)
 }
 
-// ── 楼层切换 ──────────────────────────────────────────
+// ── 楼层切换（无动画） ────────────────────────────
 
-async function enterFloor(floorId) {
-  if (isTransitioning.value) return
+function enterFloor(floorId) {
   const floor = floors.value.find(f => f.id === floorId)
   if (!floor || !map) return
 
-  isTransitioning.value = true
+  const prevFloorId = currentFloorId.value
+  if (prevFloorId === floorId) return
+
   activeAnnotationId.value = ''
   activeMarkerId.value = ''
 
-  const prevFloorId = currentFloorId.value
-  currentFloorId.value = floorId
-
-  // 隐藏旧楼层 marker/annotation
+  // 移除旧图层
+  if (tileLayers[prevFloorId] && map.hasLayer(tileLayers[prevFloorId])) map.removeLayer(tileLayers[prevFloorId])
   if (markerLayers[prevFloorId] && map.hasLayer(markerLayers[prevFloorId])) map.removeLayer(markerLayers[prevFloorId])
   if (annotationLayers[prevFloorId] && map.hasLayer(annotationLayers[prevFloorId])) map.removeLayer(annotationLayers[prevFloorId])
 
-  // 确定滑动方向（根据楼层在列表中的顺序）
-  const floorOrder = floors.value.map(f => f.id)
-  const oldIndex = floorOrder.indexOf(prevFloorId)
-  const newIndex = floorOrder.indexOf(floorId)
-  const direction = newIndex >= oldIndex ? 'down' : 'up'
-
-  const oldLayer = tileLayers[prevFloorId]
-  const newLayer = tileLayers[floorId]
-
-  await slideTransition(oldLayer, newLayer, direction)
-
-  // zoom 限制移到动画之后，避免 Leaflet 调整视口导致画面跳动
-  if (floor.viewMinZoom != null) map.setMinZoom(floor.viewMinZoom)
-  if (floor.viewMaxZoom != null) map.setMaxZoom(floor.viewMaxZoom)
-
-  // 显示新楼层 marker/annotation
+  // 添加新图层
+  currentFloorId.value = floorId
+  if (tileLayers[floorId]) tileLayers[floorId].addTo(map)
   if (markerLayers[floorId]) markerLayers[floorId].addTo(map)
   if (annotationLayers[floorId]) annotationLayers[floorId].addTo(map)
 
-  isTransitioning.value = false
+  // zoom 限制
+  if (floor.viewMinZoom != null) map.setMinZoom(floor.viewMinZoom)
+  if (floor.viewMaxZoom != null) map.setMaxZoom(floor.viewMaxZoom)
 }
 
 function switchToFloor(floorId) {
-  if (floorId === currentFloorId.value || isTransitioning.value) return
+  if (floorId === currentFloorId.value) return
   enterFloor(floorId)
 }
 
@@ -568,7 +474,6 @@ async function initViewer() {
   currentFloorId.value = 'overall'
   activeAnnotationId.value = ''
   activeMarkerId.value = ''
-  isTransitioning.value = false
 
   try {
     await nextTick()
@@ -700,17 +605,12 @@ onBeforeUnmount(destroyMap)
   color: #475569;
   text-align: center;
   white-space: nowrap;
-  transition: all 0.2s;
 }
 .floor-panel__item:hover { background: #f1f5f9; color: #0f172a; }
 .floor-panel__item--active { background: #2563eb; color: #fff; }
 
-.floor-panel-slide-enter-active, .floor-panel-slide-leave-active {
-  transition: opacity 0.3s, transform 0.3s;
-}
-.floor-panel-slide-enter-from, .floor-panel-slide-leave-to {
-  opacity: 0; transform: translateY(-50%) translateX(20px);
-}
+/* [动画注释] floor-panel-slide transition 已移除 */
+/* [动画注释] bottom-drawer transition 已移除 */
 
 .bottom-drawer {
   position: absolute;
@@ -758,22 +658,6 @@ onBeforeUnmount(destroyMap)
   gap: 6px;
   color: #94a3b8;
   font-size: 12px;
-}
-
-.bottom-drawer-panel-enter-active, .bottom-drawer-panel-leave-active {
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.bottom-drawer-panel-enter-from, .bottom-drawer-panel-leave-to { transform: translateY(100%); }
-.bottom-drawer-panel-enter-to, .bottom-drawer-panel-leave-from { transform: translateY(0); }
-
-.bottom-drawer-switch-enter-active, .bottom-drawer-switch-leave-active {
-  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
-}
-.bottom-drawer-switch-enter-from, .bottom-drawer-switch-leave-to {
-  opacity: 0; transform: translateY(20px);
-}
-.bottom-drawer-switch-enter-to, .bottom-drawer-switch-leave-from {
-  opacity: 1; transform: translateY(0);
 }
 
 .viewer-overlay {

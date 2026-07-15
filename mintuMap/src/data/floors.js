@@ -1,12 +1,11 @@
 import overall from './tiles/overall/manifest.json'
-import floor1Lobby from './tiles/floor-1-lobby/manifest.json'
-import floor1Reading from './tiles/floor-1-reading/manifest.json'
-import floor2Children from './tiles/floor-2-children/manifest.json'
+import floor1 from './tiles/floor-1/manifest.json'
+import floor2 from './tiles/floor-2/manifest.json'
 import floor3 from './tiles/floor-3/manifest.json'
 import floor4 from './tiles/floor-4/manifest.json'
 import floor5 from './tiles/floor-5/manifest.json'
 import floor6 from './tiles/floor-6/manifest.json'
-import floor7Screening from './tiles/floor-7-screening/manifest.json'
+import floor7 from './tiles/floor-7/manifest.json'
 
 export const FLOOR_CONFIG = {
   project: {
@@ -32,9 +31,9 @@ export const FLOOR_CONFIG = {
       annotations: [],
     },
     {
-      id: 'floor-1-lobby',
-      name: '1F 大厅',
-      manifest: floor1Lobby,
+      id: 'floor-1',
+      name: '1F',
+      manifest: floor1,
       viewMinZoom: 1.25,
       viewMaxZoom: 5,
       markers: [{
@@ -49,18 +48,9 @@ export const FLOOR_CONFIG = {
       annotations: [],
     },
     {
-      id: 'floor-1-reading',
-      name: '1F 阅览室',
-      manifest: floor1Reading,
-      viewMinZoom: 1.25,
-      viewMaxZoom: 5,
-      markers: [],
-      annotations: [],
-    },
-    {
-      id: 'floor-2-children',
-      name: '2F 儿童区',
-      manifest: floor2Children,
+      id: 'floor-2',
+      name: '2F',
+      manifest: floor2,
       viewMinZoom: 1.25,
       viewMaxZoom: 5,
       markers: [],
@@ -111,10 +101,10 @@ export const FLOOR_CONFIG = {
       annotations: [],
     },
     {
-      id: 'floor-7-screening',
-      name: '7F 放映厅',
-      manifest: floor7Screening,
-      viewMinZoom: 2.5,
+      id: 'floor-7',
+      name: '7F',
+      manifest: floor7,
+      viewMinZoom: 1.25,
       viewMaxZoom: 5,
       markers: [],
       annotations: [],

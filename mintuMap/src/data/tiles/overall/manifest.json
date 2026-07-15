@@ -1,6 +1,6 @@
 {
   "id": "overall",
-  "title": "0整体.png",
+  "title": "整体外观.png",
   "width": 16384,
   "height": 16384,
   "minZoom": 0,
@@ -30,7 +30,7 @@
   ],
   "initialResolution": 32.0,
   "urlTemplate": "/tiles/overall/{z}/{x}/{y}.png",
-  "manifestUrl": "/tiles/overall/manifest",
+  "manifestUrl": "/tiles/overall/manifest.json",
   "tileFormat": "png",
   "scheme": "xyz",
   "projection": "pixel",
@@ -40,6 +40,6 @@
     16384.0,
     16384.0
   ],
-  "generatedBy": "gdal2tiles",
+  "generatedBy": "Pillow",
   "note": null
 }

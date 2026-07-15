@@ -1,6 +1,6 @@
 {
   "id": "floor-4",
-  "title": "4四楼.png",
+  "title": "4层.png",
   "width": 16384,
   "height": 16384,
   "minZoom": 0,
@@ -30,7 +30,7 @@
   ],
   "initialResolution": 32.0,
   "urlTemplate": "/tiles/floor-4/{z}/{x}/{y}.png",
-  "manifestUrl": "/tiles/floor-4/manifest",
+  "manifestUrl": "/tiles/floor-4/manifest.json",
   "tileFormat": "png",
   "scheme": "xyz",
   "projection": "pixel",
@@ -40,6 +40,6 @@
     16384.0,
     16384.0
   ],
-  "generatedBy": "gdal2tiles",
+  "generatedBy": "Pillow",
   "note": null
 }
