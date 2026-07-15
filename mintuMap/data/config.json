@@ -1,9 +1,0 @@
-{
-  "max_image_bytes": 1073741824,
-  "cors_origins": [
-    "*"
-  ],
-  "tile_cache_max_age": 31536000,
-  "max_job_age_seconds": 3600,
-  "subprocess_timeout": 600
-}

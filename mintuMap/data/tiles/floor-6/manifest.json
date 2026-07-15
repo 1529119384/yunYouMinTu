@@ -1,0 +1,45 @@
+{
+  "id": "floor-6",
+  "title": "6层.png",
+  "width": 16384,
+  "height": 16384,
+  "minZoom": 0,
+  "maxZoom": 5,
+  "tileSize": 512,
+  "extent": [
+    0.0,
+    -16384.0,
+    16384.0,
+    0.0
+  ],
+  "origin": [
+    0.0,
+    0.0
+  ],
+  "resolutions": [
+    32.0,
+    16.0,
+    8.0,
+    4.0,
+    2.0,
+    1.0
+  ],
+  "center": [
+    8192.0,
+    -8192.0
+  ],
+  "initialResolution": 32.0,
+  "urlTemplate": "/tiles/floor-6/{z}/{x}/{y}.png",
+  "manifestUrl": "/tiles/floor-6/manifest.json",
+  "tileFormat": "png",
+  "scheme": "xyz",
+  "projection": "pixel",
+  "bounds": [
+    0.0,
+    0.0,
+    16384.0,
+    16384.0
+  ],
+  "generatedBy": "Pillow",
+  "note": null
+}

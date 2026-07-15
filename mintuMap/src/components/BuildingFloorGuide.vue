@@ -32,13 +32,13 @@ function scaleLegacyHotspots(points) {
  * hotspots 使用 1600 x 1600 原图坐标，可按建筑立面继续微调。
  */
 const floors = [
-  { id: 7, label: '7F', name: '七层', targetFloorId: 'floor-7-screening', image: floor7Image, offsetX: 0, offsetY: 0, hotspots: '517,497 913,694 1211,553 1210,601 912,739 516,540' },
+  { id: 7, label: '7F', name: '七层', targetFloorId: 'floor-7', image: floor7Image, offsetX: 0, offsetY: 0, hotspots: '517,497 913,694 1211,553 1210,601 912,739 516,540' },
   { id: 6, label: '6F', name: '六层', targetFloorId: 'floor-6', image: floor6Image, offsetX: 0, offsetY: 0, hotspots: '517,537 913,734 1211,593 1210,641 912,779 516,580' },
   { id: 5, label: '5F', name: '五层', targetFloorId: 'floor-5', image: floor5Image, offsetX: 0, offsetY: 0, hotspots: '517,577 913,774 1211,633 1210,681 912,819 516,620' },
   { id: 4, label: '4F', name: '四层', targetFloorId: 'floor-4', image: floor4Image, offsetX: 0, offsetY: 0, hotspots: '517,617 913,814 1211,673 1210,721 912,859 516,660' },
   { id: 3, label: '3F', name: '三层', targetFloorId: 'floor-3', image: floor3Image, offsetX: 0, offsetY: 0, hotspots: '517,657 913,854 1211,713 1210,761 912,899 516,700' },
-  { id: 2, label: '2F', name: '二层', targetFloorId: 'floor-2-children', image: floor2Image, offsetX: 0, offsetY: 0, hotspots: '517,697 913,894 1211,753 1210,801 912,939 516,740' },
-  { id: 1, label: '1F', name: '一层', targetFloorId: 'floor-1-lobby', image: floor1Image, offsetX: 0, offsetY: 0, hotspots: '517,737 913,934 1211,793 1210,841 912,979 516,780' },
+  { id: 2, label: '2F', name: '二层', targetFloorId: 'floor-2', image: floor2Image, offsetX: 0, offsetY: 0, hotspots: '517,697 913,894 1211,753 1210,801 912,939 516,740' },
+  { id: 1, label: '1F', name: '一层', targetFloorId: 'floor-1', image: floor1Image, offsetX: 0, offsetY: 0, hotspots: '517,737 913,934 1211,793 1210,841 912,979 516,780' },
 ].map((floor) => ({ ...floor, hotspots: scaleLegacyHotspots(floor.hotspots) }))
 
 const router = useRouter()
