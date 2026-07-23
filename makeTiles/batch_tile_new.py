@@ -23,7 +23,7 @@ from tile_engine import auto_tile_size, compute_zoom_levels, compute_resolutions
 
 UNIFY_TARGET_SIZE = (16384, 16384)
 
-SRC_DIR = Path(r"D:\code\heryin-云游闵图\闵图每层轴测图新的")
+SRC_DIR = Path(__file__).resolve().parent.parent / "闵图每层轴测图新的"
 OUT_DIR = Path(__file__).resolve().parent / "app" / "data" / "tiles"
 UNIFIED_DIR = Path(__file__).resolve().parent / "app" / "data" / "images_unified"
 
