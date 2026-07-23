@@ -22,10 +22,11 @@
           <span class="sidebar__icon">📍</span>
           <span>标点</span>
         </button>
-        <button class="sidebar__btn" :class="{ 'sidebar__btn--active': tool === 'annotation' }" @click="toggleTool('annotation')">
-          <span class="sidebar__icon">⭕</span>
-          <span>标注</span>
+        <button class="sidebar__btn" @click="triggerImport">
+          <span class="sidebar__icon">📥</span>
+          <span>导入</span>
         </button>
+        <input ref="fileInputRef" type="file" accept=".json" style="display:none" @change="importConfig" />
         <button class="sidebar__btn" @click="exportConfig">
           <span class="sidebar__icon">💾</span>
           <span>导出</span>
@@ -48,70 +49,43 @@
         <div class="edit-panel__body">
           <!-- 标点编辑 -->
           <template v-if="editingType === 'marker' && selectedMarker">
+            <!-- 标点样式：7 种 SVG 颜色图标（内联 SVG 避免加载失败） -->
             <label class="field">
-              <span class="field__label">标题</span>
-              <input v-model.trim="selectedMarker.title" type="text" class="field__input" placeholder="如：服务台" />
-            </label>
-            <label class="field">
-              <span class="field__label">颜色</span>
+              <span class="field__label">标点样式</span>
               <div class="color-grid">
                 <div v-for="opt in COLOR_OPTIONS" :key="opt.value"
                      class="color-swatch"
                      :class="{ 'color-swatch--active': selectedMarker.color === opt.value }"
                      :style="{ '--swatch-color': opt.tagBg }"
                      :title="opt.label"
-                     @click="selectedMarker.color = opt.value">
-                  <img :src="opt.icon" class="color-swatch__icon" />
+                     @click="pickColor(opt.value)">
+                   <svg viewBox="0 0 104.6 144.9" class="color-swatch__icon">
+                    <path d="M52.3,0C23.5,0,0,24.1,0,53.8s28,66,49.5,89.8c1.5,1.7,4.1,1.7,5.6,0C76.6,120.8,104.6,86.1,104.6,53.8S81.2,0,52.3,0z" fill="#fff"/>
+                    <circle cx="52.3" cy="53.8" r="20" :fill="opt.tagBg"/>
+                  </svg>
+
                 </div>
               </div>
             </label>
-            <label class="field">
-              <span class="field__label">类型</span>
-              <select v-model="selectedMarker.type" class="field__input">
-                <option v-for="t in TYPE_OPTIONS" :key="t.value" :value="t.value">{{ t.label }}</option>
-              </select>
-            </label>
-            <label class="field">
-              <span class="field__label">标签</span>
-              <div class="tag-list">
-                <span v-for="(tag, i) in selectedMarker.label" :key="i" class="tag" :style="{ backgroundColor: getTagColor(selectedMarker.color) }">
-                  {{ tag }}
-                  <button class="tag__x" @click="selectedMarker.label.splice(i, 1)">×</button>
-                </span>
-              </div>
-              <input v-model="tagInput" type="text" class="field__input" placeholder="输入后回车添加" @keydown.enter.prevent="addTag" />
-            </label>
-            <label class="field">
-              <span class="field__label">描述</span>
-              <textarea v-model="selectedMarker.text" rows="4" class="field__input" placeholder="支持 HTML" />
-            </label>
+            <!-- 全景关联：选择对应 360° 场景 -->
             <label class="field">
               <span class="field__label">全景关联</span>
-              <select v-model="selectedMarker.sceneId" class="field__input">
+              <select v-model="selectedMarker.sceneId" class="field__input" @change="onMarkerChange">
                 <option value="">无关联</option>
                 <option v-for="n in 116" :key="n" :value="'scene' + n">scene{{ n }}</option>
               </select>
             </label>
+            <!-- 标点大小 -->
+            <label class="field">
+              <span class="field__label">标点大小</span>
+              <div class="size-row">
+                <input type="range" min="0.3" max="2" step="0.05" :value="selectedMarker.size || 1"
+                       @input="onSizeChange($event.target.value)" class="size-slider">
+                <span class="size-value">{{ (selectedMarker.size || 1).toFixed(2) }}×</span>
+              </div>
+            </label>
             <div class="field__actions">
               <button class="btn btn--danger" @click="removeMarker">删除</button>
-            </div>
-          </template>
-
-          <!-- 标注编辑 -->
-          <template v-else-if="editingType === 'annotation' && selectedAnnotation">
-            <label class="field">
-              <span class="field__label">显示文字</span>
-              <input v-model.trim="selectedAnnotation.label" type="text" class="field__input" placeholder="如：1F 大厅" />
-            </label>
-            <label class="field">
-              <span class="field__label">目标楼层</span>
-              <select v-model="selectedAnnotation.targetFloor" class="field__input">
-                <option value="">无</option>
-                <option v-for="f in floors" :key="f.id" :value="f.id">{{ f.name }}</option>
-              </select>
-            </label>
-            <div class="field__actions">
-              <button class="btn btn--danger" @click="removeAnnotation">删除</button>
             </div>
           </template>
 
@@ -123,26 +97,9 @@
       </div>
     </transition>
 
-    <!-- 底部预览抽屉 -->
-    <transition name="drawer">
-      <div v-if="previewData" class="drawer">
-        <div class="drawer__content">
-          <div class="drawer__left">
-            <h2 class="drawer__title">{{ previewData.title }}</h2>
-            <div v-if="previewData.tags?.length" class="drawer__tags">
-              <span v-for="tag in previewData.tags" :key="tag" class="drawer__tag" :style="{ backgroundColor: previewData.tagBg }">{{ tag }}</span>
-            </div>
-          </div>
-          <div class="drawer__right">
-            <p class="drawer__desc">{{ previewData.desc }}</p>
-          </div>
-        </div>
-      </div>
-    </transition>
-
     <!-- 状态提示 -->
     <div v-if="tool" class="tool-hint">
-      点击地图放置{{ tool === 'marker' ? '标点' : '标注' }} · 按 ESC 取消
+      点击地图放置标点 · 按 ESC 取消
     </div>
 
     <div v-if="loading" class="editor-overlay">加载中...</div>
@@ -151,27 +108,21 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
 // ── 常量 ──────────────────────────────────────────────
 
 const COLOR_OPTIONS = [
-  { value: 'blue',     label: '通用',   icon: '/pin_blue.svg',     tagBg: '#66cccc' },
-  { value: 'blueDark', label: '重要',   icon: '/pin_blueDark.svg', tagBg: '#1f296a' },
-  { value: 'gray',     label: '附属',   icon: '/pin_gray.svg',     tagBg: '#3b3b3b' },
-  { value: 'red',      label: '服务',   icon: '/pin_red.svg',      tagBg: '#cc6666' },
-  { value: 'orange',   label: '餐厅',   icon: '/pin_orange.svg',   tagBg: '#d36839' },
-  { value: 'gate',     label: '入口',   icon: '/pin_gate.svg',     tagBg: '#1f296a' },
-  { value: 'landmark', label: '地标',   icon: '/pin_landmark.svg', tagBg: '#1f296a' },
-]
+  { value: 'blue',     label: '通用',   tagBg: '#66cccc', inline: true },
+  { value: 'blueDark', label: '重要',   tagBg: '#1f296a', inline: true },
+  { value: 'gray',     label: '附属',   tagBg: '#3b3b3b', inline: true },
+  { value: 'red',      label: '服务',   tagBg: '#cc6666', inline: true },
+  { value: 'orange',   label: '餐厅',   tagBg: '#d36839', inline: true },
+  { value: 'gate',     label: '入口',   tagBg: '#1f296a', inline: true },
+  { value: 'landmark', label: '地标',   tagBg: '#1f296a', inline: true },
 
-const TYPE_OPTIONS = [
-  { value: 'building',  label: '建筑' },
-  { value: 'entrance',  label: '入口' },
-  { value: 'service',   label: '服务' },
-  { value: 'landmark',  label: '地标' },
 ]
 
 const EMPTY_TILE = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
@@ -186,19 +137,18 @@ const props = defineProps({
 // ── 状态 ──────────────────────────────────────────────
 
 const mapRef = ref(null)
+const fileInputRef = ref(null)
 const loading = ref(true)
 const error = ref('')
-const tool = ref(null)        // 'marker' | 'annotation' | null
-const editingType = ref('')   // 'marker' | 'annotation'
+const tool = ref(null)
+const editingType = ref('')
 const selectedId = ref('')
-const tagInput = ref('')
 const currentFloorId = ref(props.floors[0]?.id || '')
-const floorData = ref(new Map()) // floorId → { markers: [], annotations: [] }
+const floorData = ref(new Map())
 
 let map = null
 const tileLayers = {}
 const markerGroups = {}
-const annotationGroups = {}
 
 // ── 计算属性 ──────────────────────────────────────────
 
@@ -209,84 +159,37 @@ const selectedMarker = computed(() => {
   return currentFloorData.value.markers.find(m => m.id === selectedId.value) || null
 })
 
-const selectedAnnotation = computed(() => {
-  if (editingType.value !== 'annotation') return null
-  return currentFloorData.value.annotations.find(a => a.id === selectedId.value) || null
-})
+const showPanel = computed(() => editingType.value === 'marker')
 
-const showPanel = computed(() => editingType.value === 'marker' || editingType.value === 'annotation')
-
-const panelTitle = computed(() => {
-  if (editingType.value === 'marker') return '编辑标点'
-  if (editingType.value === 'annotation') return '编辑标注'
-  return ''
-})
-
-const previewData = computed(() => {
-  if (selectedMarker.value) {
-    const m = selectedMarker.value
-    return {
-      title: m.title || '标点',
-      tags: m.label,
-      tagBg: getTagColor(m.color),
-      desc: m.text || '',
-    }
-  }
-  if (selectedAnnotation.value) {
-    const a = selectedAnnotation.value
-    return {
-      title: a.label || '标注',
-      tags: [],
-      tagBg: '',
-      desc: a.targetFloor ? `进入 ${getFloorName(a.targetFloor)}` : '',
-    }
-  }
-  return null
-})
+const panelTitle = computed(() => '编辑标点')
 
 // ── 工具函数 ──────────────────────────────────────────
-
-function getTagColor(color) {
-  return COLOR_OPTIONS.find(c => c.value === color)?.tagBg || '#66cccc'
-}
-
-function getIconUrl(color) {
-  return COLOR_OPTIONS.find(c => c.value === color)?.icon || '/pin_blue.svg'
-}
-
-function getFloorName(floorId) {
-  return props.floors.find(f => f.id === floorId)?.name || floorId
-}
 
 function deriveBaseUrl(urlTemplate) {
   return urlTemplate.replace(/\/\{z\}\/\{x\}\/\{y\}\.\w+$/, '')
 }
 
-// ── Leaflet 图标 ──────────────────────────────────────
+// ── Leaflet 图标（内联 SVG，避免外部 SVG 加载失败） ──
 
-function createMarkerIcon(data, active = false) {
-  const size = active ? [52, 72] : [36, 50]
-  return L.icon({
-    iconUrl: getIconUrl(data.color),
-    iconSize: size,
-    iconAnchor: [size[0] / 2, size[1]],
-    popupAnchor: [0, -size[1]],
-  })
+const PIN_FILLS = {
+  blue: '#66cccc', blueDark: '#1f296a', gray: '#3b3b3b',
+  red: '#cc6666', orange: '#d36839', gate: '#1f296a', landmark: '#1f296a',
 }
 
-function createAnnotationIcon(active = false) {
-  const s = active ? 48 : 40
-  const r = active ? 11 : 9
-  const fill = active ? 'rgba(102,204,204,0.9)' : 'rgba(255,255,255,0.9)'
-  const stroke = active ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.6)'
+function createMarkerIcon(data, active = false) {
+  const fill = PIN_FILLS[data.color] || '#66cccc'
+  const s = data.size || 1
+  const w = (active ? 52 : 36) * s
+  const h = (active ? 72 : 50) * s
+  const html = `<svg viewBox="0 0 104.6 144.9" width="${w}" height="${h}">
+    <path d="M52.3,0C23.5,0,0,24.1,0,53.8s28,66,49.5,89.8c1.5,1.7,4.1,1.7,5.6,0C76.6,120.8,104.6,86.1,104.6,53.8S81.2,0,52.3,0z" fill="#fff"/>
+    <circle cx="52.3" cy="53.8" r="20" fill="${fill}"/>
+  </svg>`
   return L.divIcon({
-    html: `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" style="cursor:pointer">
-      <circle cx="${s/2}" cy="${s/2}" r="${s/2-2}" fill="none" stroke="${stroke}" stroke-width="2.5"/>
-      <circle cx="${s/2}" cy="${s/2}" r="${r}" fill="${fill}"/>
-    </svg>`,
-    className: 'annotation-marker',
-    iconSize: [s, s],
-    iconAnchor: [s/2, s/2],
+    html,
+    className: 'editor-pin-marker',
+    iconSize: [w, h],
+    iconAnchor: [w / 2, h],
   })
 }
 
@@ -322,8 +225,7 @@ function toggleTool(t) {
 
 function onMapClick(e) {
   if (!tool.value) return
-  if (tool.value === 'marker') addMarker(e.latlng)
-  else if (tool.value === 'annotation') addAnnotation(e.latlng)
+  addMarker(e.latlng)
   tool.value = null
   map.getContainer().style.cursor = ''
 }
@@ -347,10 +249,12 @@ function addMarker(latlng) {
     text: '',
     type: 'building',
     sceneId: '',
+    size: 1,
   }
   currentFloorData.value.markers.push(data)
   renderMarker(data)
   selectItem(data.id, 'marker')
+  saveToLocalStorage()
 }
 
 function removeMarker() {
@@ -360,6 +264,7 @@ function removeMarker() {
   const group = markerGroups[currentFloorId.value]
   if (group) group.eachLayer(l => { if (l._data?.id === id) group.removeLayer(l) })
   closePanel()
+  saveToLocalStorage()
 }
 
 function renderMarker(data) {
@@ -372,47 +277,51 @@ function renderMarker(data) {
     riseOnHover: true,
   }).addTo(map)
   marker.on('click', (e) => { L.DomEvent.stopPropagation(e); selectItem(data.id, 'marker') })
-  marker.on('dragend', () => { data.position = [marker.getLatLng().lat, marker.getLatLng().lng] })
+  marker.on('dragend', () => { data.position = [marker.getLatLng().lat, marker.getLatLng().lng]; saveToLocalStorage() })
   marker._data = data
   group.addLayer(marker)
 }
 
-// ── 标注管理 ──────────────────────────────────────────
+// ── 颜色选取 + 标点变更时更新地图图标 ──────────────
 
-function addAnnotation(latlng) {
-  const data = {
-    id: `a-${Date.now()}`,
-    position: [latlng.lat, latlng.lng],
-    label: `标注${currentFloorData.value.annotations.length + 1}`,
-    targetFloor: '',
-  }
-  currentFloorData.value.annotations.push(data)
-  renderAnnotation(data)
-  selectItem(data.id, 'annotation')
+function updateMarkerIcon(markerData) {
+  if (!markerData || !map) return
+  const group = markerGroups[currentFloorId.value]
+  if (!group) return
+  group.eachLayer(layer => {
+    if (layer._data?.id === markerData.id) {
+      layer.setIcon(createMarkerIcon(markerData, false))
+    }
+  })
 }
 
-function removeAnnotation() {
-  if (!selectedAnnotation.value) return
-  const id = selectedAnnotation.value.id
-  currentFloorData.value.annotations = currentFloorData.value.annotations.filter(a => a.id !== id)
-  const group = annotationGroups[currentFloorId.value]
-  if (group) group.eachLayer(l => { if (l._data?.id === id) group.removeLayer(l) })
-  closePanel()
+function pickColor(color) {
+  if (!selectedMarker.value) return
+  selectedMarker.value.color = color
+  updateMarkerIcon(selectedMarker.value)
+  saveToLocalStorage()
 }
 
-function renderAnnotation(data) {
-  const group = annotationGroups[currentFloorId.value]
-  if (!group || !map) return
-  const latlng = L.latLng(data.position[0], data.position[1])
-  const marker = L.marker(latlng, {
-    draggable: true,
-    icon: createAnnotationIcon(data.id === selectedId.value),
-    riseOnHover: true,
-  }).addTo(map)
-  marker.on('click', (e) => { L.DomEvent.stopPropagation(e); selectItem(data.id, 'annotation') })
-  marker.on('dragend', () => { data.position = [marker.getLatLng().lat, marker.getLatLng().lng] })
-  marker._data = data
-  group.addLayer(marker)
+function onMarkerChange() {
+  if (!selectedMarker.value) return
+  saveToLocalStorage()
+}
+
+function onSizeChange(val) {
+  if (!selectedMarker.value) return
+  const s = parseFloat(val)
+  if (isNaN(s)) return
+  selectedMarker.value.size = s
+  updateMarkerIcon(selectedMarker.value)
+  saveToLocalStorage()
+}
+
+// ── 显式保存到 localStorage ────────────────────────
+
+function saveToLocalStorage() {
+  const data = {}
+  floorData.value.forEach((v, k) => { data[k] = v })
+  localStorage.setItem('mintumap-editor-data', JSON.stringify(data))
 }
 
 // ── 选择 ──────────────────────────────────────────────
@@ -423,17 +332,9 @@ function selectItem(id, type) {
 }
 
 function closePanel() {
+  saveToLocalStorage()
   selectedId.value = ''
   editingType.value = ''
-}
-
-// ── 标签 ──────────────────────────────────────────────
-
-function addTag() {
-  const tag = tagInput.value.trim()
-  if (!tag || !selectedMarker.value) return
-  selectedMarker.value.label.push(tag)
-  tagInput.value = ''
 }
 
 // ── 楼层切换 ──────────────────────────────────────────
@@ -441,15 +342,13 @@ function addTag() {
 function switchFloor(id) {
   currentFloorId.value = id
   closePanel()
-  // 隐藏所有图层，显示当前楼层
+  // 隐藏所有已显示图层，再显示当前楼层
   Object.keys(tileLayers).forEach(fid => {
     if (map.hasLayer(tileLayers[fid])) map.removeLayer(tileLayers[fid])
     if (markerGroups[fid]) map.removeLayer(markerGroups[fid])
-    if (annotationGroups[fid]) map.removeLayer(annotationGroups[fid])
   })
   if (tileLayers[id]) tileLayers[id].addTo(map)
   if (markerGroups[id]) markerGroups[id].addTo(map)
-  if (annotationGroups[id]) annotationGroups[id].addTo(map)
 }
 
 // ── 清空 ──────────────────────────────────────────────
@@ -459,10 +358,9 @@ function clearAll() {
   data.markers = []
   data.annotations = []
   const mg = markerGroups[currentFloorId.value]
-  const ag = annotationGroups[currentFloorId.value]
   if (mg) mg.clearLayers()
-  if (ag) ag.clearLayers()
   closePanel()
+  saveToLocalStorage()
 }
 
 // ── 导出 ──────────────────────────────────────────────
@@ -491,6 +389,69 @@ function exportConfig() {
   URL.revokeObjectURL(url)
 }
 
+// ── 导入 ──────────────────────────────────────────────
+
+function triggerImport() {
+  fileInputRef.value?.click()
+}
+
+function importConfig(e) {
+  const file = e.target?.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    try {
+      const imported = JSON.parse(ev.target?.result)
+      if (!imported?.floors || !Array.isArray(imported.floors)) {
+        alert('导入失败：文件格式不正确，缺少 floors 数组')
+        return
+      }
+      // 按楼层匹配 ID 写入数据
+      let count = 0
+      for (const f of imported.floors) {
+        if (floorData.value.has(f.id)) {
+          floorData.value.set(f.id, {
+            markers: f.markers || [],
+            annotations: f.annotations || [],
+          })
+          count += (f.markers || []).length
+        }
+      }
+      markerGroups[currentFloorId.value]?.clearLayers()
+      // 重新渲染当前楼层所有标点
+      const floor = props.floors.find(f => f.id === currentFloorId.value)
+      if (floor) renderFloorMarkers(floor)
+      saveToLocalStorage()
+      alert(`导入成功：${count} 个标点`)
+    } catch {
+      alert('导入失败：无法解析 JSON 文件')
+    }
+  }
+  reader.readAsText(file)
+  // 重置 input 以便重复选择同一文件
+  e.target.value = ''
+}
+
+function renderFloorMarkers(floor) {
+  const data = floorData.value.get(floor.id)
+  if (!data) return
+  const group = markerGroups[floor.id]
+  if (!group) return
+  group.clearLayers()
+  for (const m of data.markers || []) {
+    const latlng = L.latLng(m.position[0], m.position[1])
+    const marker = L.marker(latlng, {
+      draggable: true,
+      icon: createMarkerIcon(m, m.id === selectedId.value),
+      riseOnHover: true,
+    })
+    marker.on('click', (e) => { L.DomEvent.stopPropagation(e); selectItem(m.id, 'marker') })
+    marker.on('dragend', () => { m.position = [marker.getLatLng().lat, marker.getLatLng().lng]; saveToLocalStorage() })
+    marker._data = m
+    group.addLayer(marker)
+  }
+}
+
 // ── 初始化 ────────────────────────────────────────────
 
 async function init() {
@@ -510,14 +471,23 @@ async function init() {
       maxBoundsViscosity: 1, bounceAtZoomLimits: false, inertia: true,
     })
 
+    // 从 localStorage 恢复上次编辑的数据
+    function loadSavedData() {
+      try {
+        const raw = localStorage.getItem('mintumap-editor-data')
+        if (!raw) return {}
+        return JSON.parse(raw)
+      } catch { return {} }
+    }
+    const savedData = loadSavedData()
+
     // 加载所有楼层 manifest 并创建图层
     for (const floor of props.floors) {
-      // 初始化数据
-      floorData.value.set(floor.id, { markers: [], annotations: [] })
+      // 初始化数据（优先用 localStorage 保存的，否则新建空数据）
+      floorData.value.set(floor.id, savedData[floor.id] || { markers: [], annotations: [] })
 
-      // 创建图层组
+      // 创建标点图层组（拖拽标点用）
       markerGroups[floor.id] = L.layerGroup()
-      annotationGroups[floor.id] = L.layerGroup()
 
       // 加载 manifest
       try {
@@ -550,15 +520,19 @@ async function init() {
       }
     }
 
+    // 渲染所有楼层中已有的标点（从 localStorage 恢复）
+    for (const floor of props.floors) {
+      renderFloorMarkers(floor)
+    }
+
     // 设置全局 bounds（所有楼层 16384×16384）
     const globalSW = map.unproject([0, 16384], 5)
     const globalNE = map.unproject([16384, 0], 5)
     map.setMaxBounds(L.latLngBounds(globalSW, globalNE).pad(0.1))
 
-    // 显示第一层楼
+    // 显示默认楼层切片底图和标点
     if (tileLayers[currentFloorId.value]) tileLayers[currentFloorId.value].addTo(map)
     markerGroups[currentFloorId.value]?.addTo(map)
-    annotationGroups[currentFloorId.value]?.addTo(map)
 
     const firstBounds = tileLayers[currentFloorId.value]?.options?.bounds
     if (firstBounds) map.fitBounds(firstBounds, { animate: false })
@@ -566,20 +540,15 @@ async function init() {
     map.invalidateSize(false)
     map.on('click', onMapClick)
     document.addEventListener('keydown', onKeyDown)
+
+    // 初始化完成后保存一次，确认数据持久化
+    saveToLocalStorage()
   } catch (e) {
     error.value = e instanceof Error ? e.message : '加载失败'
   } finally {
     loading.value = false
   }
 }
-
-// ── 自动保存 ──────────────────────────────────────────
-
-watch(floorData, () => {
-  const data = {}
-  floorData.value.forEach((v, k) => { data[k] = v })
-  localStorage.setItem('mintumap-editor-data', JSON.stringify(data))
-}, { deep: true })
 
 // ── 生命周期 ──────────────────────────────────────────
 
@@ -709,20 +678,28 @@ select.field__input { cursor: pointer; }
 }
 .color-swatch:hover { border-color: rgba(255,255,255,0.2); }
 .color-swatch--active { border-color: #2563eb; background: rgba(37,99,235,0.15); }
-.color-swatch__icon { width: 22px; height: 32px; object-fit: contain; }
+.color-swatch__icon { width: 26px; height: 32px; object-fit: contain; }
 
-/* ── 标签 ── */
-.tag-list { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
-.tag {
-  display: inline-flex; align-items: center; gap: 3px;
-  padding: 2px 8px; border-radius: 10px;
-  color: #fff; font-size: 11px; font-weight: 500;
+/* ── 标点大小滑块 ── */
+.size-row { display: flex; align-items: center; gap: 8px; }
+.size-slider {
+  flex: 1; height: 4px; -webkit-appearance: none; appearance: none;
+  background: rgba(255,255,255,0.15); border-radius: 2px; outline: none;
+  cursor: pointer;
 }
-.tag__x {
-  background: none; border: none; color: inherit;
-  font-size: 13px; cursor: pointer; opacity: 0.6; padding: 0;
+.size-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #2563eb; border: none; cursor: pointer;
 }
-.tag__x:hover { opacity: 1; }
+.size-slider::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #2563eb; border: none; cursor: pointer;
+}
+.size-value {
+  min-width: 40px; text-align: right;
+  font-size: 12px; color: #94a3b8; font-variant-numeric: tabular-nums;
+}
 
 /* ── 工具提示 ── */
 .tool-hint {
@@ -735,37 +712,6 @@ select.field__input { cursor: pointer; }
   box-shadow: 0 2px 12px rgba(0,0,0,0.3);
   pointer-events: none;
 }
-
-/* ── 底部抽屉 ── */
-.drawer {
-  position: absolute; left: 0; right: 0; bottom: 0;
-  height: 180px; z-index: 1000; pointer-events: none;
-  overflow: hidden;
-}
-.drawer__content {
-  height: 100%; box-sizing: border-box;
-  background: rgba(15,23,42,0.92);
-  backdrop-filter: blur(12px);
-  display: flex; align-items: center;
-  padding: 20px 36px;
-  border-top: 1px solid rgba(255,255,255,0.06);
-  pointer-events: auto;
-}
-.drawer__left { flex: 1; }
-.drawer__right { flex: 1; text-align: right; }
-.drawer__title { font-size: 24px; font-weight: 700; margin: 0 0 8px; color: #f1f5f9; }
-.drawer__tags { display: flex; gap: 6px; flex-wrap: wrap; }
-.drawer__tag {
-  display: inline-block; color: #fff; border-radius: 6px;
-  padding: 3px 12px; font-weight: 600; font-size: 13px;
-}
-.drawer__desc { font-size: 13px; color: #94a3b8; line-height: 1.7; max-width: 400px; margin-left: auto; }
-
-/* ── 抽屉动画 ── */
-.drawer-enter-active, .drawer-leave-active {
-  transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
-}
-.drawer-enter-from, .drawer-leave-to { transform: translateY(100%); }
 
 /* ── 面板动画 ── */
 .panel-slide-enter-active, .panel-slide-leave-active {
@@ -784,7 +730,7 @@ select.field__input { cursor: pointer; }
 .editor-overlay--error { color: #fecaca; }
 
 :deep(.leaflet-container) { width: 100%; height: 100%; background: transparent; }
-:deep(.annotation-marker) { background: transparent; border: none; }
+:deep(.editor-pin-marker) { background: transparent; border: none; }
 
 @media (max-width: 768px) {
   .sidebar { width: 120px; }
