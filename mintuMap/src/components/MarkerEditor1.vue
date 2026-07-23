@@ -85,6 +85,13 @@
               <span class="field__label">描述</span>
               <textarea v-model="selectedMarker.text" rows="4" class="field__input" placeholder="支持 HTML" />
             </label>
+            <label class="field">
+              <span class="field__label">全景关联</span>
+              <select v-model="selectedMarker.sceneId" class="field__input">
+                <option value="">无关联</option>
+                <option v-for="n in 116" :key="n" :value="'scene' + n">scene{{ n }}</option>
+              </select>
+            </label>
             <div class="field__actions">
               <button class="btn btn--danger" @click="removeMarker">删除</button>
             </div>
@@ -339,6 +346,7 @@ function addMarker(latlng) {
     label: [],
     text: '',
     type: 'building',
+    sceneId: '',
   }
   currentFloorData.value.markers.push(data)
   renderMarker(data)
@@ -468,7 +476,7 @@ function exportConfig() {
         name: f.name,
         markers: data.markers.map(m => ({
           id: m.id, position: m.position, title: m.title,
-          color: m.color, label: [...m.label], text: m.text, type: m.type,
+          color: m.color, label: [...m.label], text: m.text, type: m.type, sceneId: m.sceneId || '',
         })),
         annotations: data.annotations.map(a => ({
           id: a.id, position: a.position, label: a.label, targetFloor: a.targetFloor,

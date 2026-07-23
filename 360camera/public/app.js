@@ -22,7 +22,7 @@ function makeHotspots(sceneId, order) {
             type: 'custom', cssClass: 'custom-hotspot',
             createTooltipFunc: (el) => { el.innerHTML = ARROW_LEFT; el.title = '返回 ' + prev; },
             clickHandlerFunc: () => switchScene(prev)
-        }
+        },
     ];
 }
 

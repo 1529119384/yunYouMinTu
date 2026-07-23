@@ -43,7 +43,7 @@ initViewer({
     scenes: {
         scene1: {
             type: 'equirectangular',
-            panorama: 'images/scene1.jpg',
+            panorama: params.get('fixed') ? 'images/scene1_fixed.jpg' : 'images/scene1.jpg',
             hfov: 110,
             autoRotate: -2,
         },
